@@ -44,6 +44,11 @@
 		<script src="{% static 'analysis_squid_kerio/assets/js/html5shiv.min.js'%}"></script>
 		<script src="{% static 'analysis_squid_kerio/assets/js/respond.min.js'%}"></script>
 		<![endif]-->
+    {% block style_page %}
+        <style>
+
+        </style>
+    {% endblock %}
 	</head>
 
 	<body class="no-skin">
@@ -62,8 +67,8 @@
 				<div class="navbar-header pull-left">
 					<a href="index.html" class="navbar-brand">
 						<small>
-							<i class="fa fa-leaf"></i>
-							Ace Admin
+							<i class="fa fa-search"></i>
+							ASK Admin
 						</small>
 					</a>
 				</div>
@@ -325,42 +330,42 @@
 							</ul>
 						</li>
 
-						<li class="light-blue dropdown-modal">
-							<a data-toggle="dropdown" href="#" class="dropdown-toggle">
-								<img class="nav-user-photo" src="{% static 'analysis_squid_kerio/assets/images/avatars/user.jpg'%}" alt="Jason's Photo" />
-								<span class="user-info">
-									<small>Welcome,</small>
-									Jason
-								</span>
-
-								<i class="ace-icon fa fa-caret-down"></i>
-							</a>
-
-							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
-								<li>
-									<a href="#">
-										<i class="ace-icon fa fa-cog"></i>
-										Settings
-									</a>
-								</li>
-
-								<li>
-									<a href="profile.html">
-										<i class="ace-icon fa fa-user"></i>
-										Profile
-									</a>
-								</li>
-
-								<li class="divider"></li>
-
-								<li>
-									<a href="#">
-										<i class="ace-icon fa fa-power-off"></i>
-										Logout
-									</a>
-								</li>
-							</ul>
-						</li>
+{#						<li class="light-blue dropdown-modal">#}
+{#							<a data-toggle="dropdown" href="#" class="dropdown-toggle">#}
+{#								<img class="nav-user-photo" src="{% static 'analysis_squid_kerio/assets/images/avatars/user.jpg'%}" alt="Jason's Photo" />#}
+{#								<span class="user-info">#}
+{#									<small>Welcome,</small>#}
+{#									Jason#}
+{#								</span>#}
+{##}
+{#								<i class="ace-icon fa fa-caret-down"></i>#}
+{#							</a>#}
+{##}
+{#							<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">#}
+{#								<li>#}
+{#									<a href="#">#}
+{#										<i class="ace-icon fa fa-cog"></i>#}
+{#										Settings#}
+{#									</a>#}
+{#								</li>#}
+{##}
+{#								<li>#}
+{#									<a href="profile.html">#}
+{#										<i class="ace-icon fa fa-user"></i>#}
+{#										Profile#}
+{#									</a>#}
+{#								</li>#}
+{##}
+{#								<li class="divider"></li>#}
+{##}
+{#								<li>#}
+{#									<a href="#">#}
+{#										<i class="ace-icon fa fa-power-off"></i>#}
+{#										Logout#}
+{#									</a>#}
+{#								</li>#}
+{#							</ul>#}
+{#						</li>#}
 					</ul>
 				</div>
 			</div><!-- /.navbar-container -->
@@ -408,7 +413,7 @@
 
 				<ul class="nav nav-list">
 					<li class="{% block active_open %}{% endblock active_open %}">
-						<a href="index.html">
+						<a href="{% url 'analysis_squid_kerio:index' %}">
 							<i class="menu-icon fa fa-tachometer"></i>
 							<span class="menu-text"> Dashboard </span>
 						</a>
@@ -416,7 +421,7 @@
 						<b class="arrow"></b>
 					</li>
 
-					<li class="">
+					{% comment %}<li class="">
 						<a href="#" class="dropdown-toggle">
 							<i class="menu-icon fa fa-desktop"></i>
 							<span class="menu-text">
@@ -612,7 +617,39 @@
 								</ul>
 							</li>
 						</ul>
-					</li>
+					</li>{% endcomment %}
+                    <li class="{% block active_open_logs %}{% endblock active_open_logs %}">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="menu-icon fa fa-book  "></i>
+                            <span class="menu-text"> Logs </span>
+
+                            <b class="arrow fa fa-angle-down"></b>
+                        </a>
+
+                        <b class="arrow"></b>
+
+                        <ul class="submenu">
+                            <li class="{% block active_logs%}{% endblock active_logs%}">
+                                <a href="{% url 'analysis_squid_kerio:report' %}">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Logs
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
+                        </ul>
+                        <ul class="submenu">
+                            <li class="{% block active_logs_user%}{% endblock active_logs_user%}">
+                                <a href="{% url 'analysis_squid_kerio:report' %}">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Logs User
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
+                        </ul>
+
+                    </li>
 
 					<li class="{% block active_open_report %}{% endblock active_open_report %}">
 						<a href="#" class="dropdown-toggle">
@@ -625,14 +662,14 @@
 						<b class="arrow"></b>
 
 						<ul class="submenu">
-							<li class="{% block active_report%}{% endblock active_report%}">
+							{% comment %}<li class="{% block active_report%}{% endblock active_report%}">
 								<a href="{% url 'analysis_squid_kerio:report' %}">
 									<i class="menu-icon fa fa-caret-right"></i>
 									Reporte General
 								</a>
 
 								<b class="arrow"></b>
-							</li>
+							</li>{% endcomment %}
 
 							<li class="{% block active_report_filter%}{% endblock active_report_filter%}">
 								<a href="{% url 'analysis_squid_kerio:report_filter' %}">
@@ -651,9 +688,11 @@
 								<b class="arrow"></b>
 							</li>
 						</ul>
+
 					</li>
 
-					<li class="">
+
+					{% comment %}<li class="">
 						<a href="#" class="dropdown-toggle">
 							<i class="menu-icon fa fa-pencil-square-o"></i>
 							<span class="menu-text"> Forms </span>
@@ -709,18 +748,18 @@
 								<b class="arrow"></b>
 							</li>
 						</ul>
-					</li>
+					</li>{% endcomment %}
 
-					<li class="">
+					{% comment %}<li class="">
 						<a href="widgets.html">
 							<i class="menu-icon fa fa-list-alt"></i>
 							<span class="menu-text"> Widgets </span>
 						</a>
 
 						<b class="arrow"></b>
-					</li>
+					</li>{% endcomment %}
 
-					<li class="">
+					{% comment %}<li class="">
 						<a href="calendar.html">
 							<i class="menu-icon fa fa-calendar"></i>
 
@@ -734,18 +773,18 @@
 						</a>
 
 						<b class="arrow"></b>
-					</li>
+					</li>{% endcomment %}
 
-					<li class="">
+					{% comment %}<li class="">
 						<a href="gallery.html">
 							<i class="menu-icon fa fa-picture-o"></i>
 							<span class="menu-text"> Gallery </span>
 						</a>
 
 						<b class="arrow"></b>
-					</li>
+					</li>{% endcomment %}
 
-					<li class="">
+					{% comment %}<li class="">
 						<a href="#" class="dropdown-toggle">
 							<i class="menu-icon fa fa-tag"></i>
 							<span class="menu-text"> More Pages </span>
@@ -828,9 +867,9 @@
 								<b class="arrow"></b>
 							</li>
 						</ul>
-					</li>
+					</li>{% endcomment %}
 
-					<li class="">
+					{% comment %}<li class="">
 						<a href="#" class="dropdown-toggle">
 							<i class="menu-icon fa fa-file-o"></i>
 
@@ -891,7 +930,7 @@
 								<b class="arrow"></b>
 							</li>
 						</ul>
-					</li>
+					</li>{% endcomment %}
 				</ul><!-- /.nav-list -->
 
 				<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
@@ -909,8 +948,8 @@
 				<div class="footer-inner">
 					<div class="footer-content">
 						<span class="bigger-120">
-							<span class="blue bolder">Ace</span>
-							Application &copy; 2013-2014
+							<span class="blue bolder">EPEP-C</span>
+							ASK &copy; 2022
 						</span>
 
 						&nbsp; &nbsp;

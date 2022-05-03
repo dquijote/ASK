@@ -29,24 +29,46 @@ class LogsSquid(models.Model):
     request_server_name = models.CharField("Nombre servidor", max_length=200)
     content_type = models.CharField("Tipo de contenido", max_length=100)
 
-class LogsSquidTmp(models.Model):
-    time_stamp = models.CharField("Time Stamp", max_length=100, default=1627704012)
-    date_time = models.DateTimeField("Fecha")
-    time_request = models.IntegerField("Duracion de consulta")
-    ip_client = models.GenericIPAddressField("Ip cliente")
-    cache_result_code = models.CharField("Codigo de cache", max_length=50)
-    size_transfered = models.IntegerField("Tamanno de transf")
-    http_method = models.CharField("Metodo http", max_length=50)
-    url = models.CharField("Url", max_length=10000)
-    user_name = models.CharField("Usuario", max_length=200)
-    request_server_name = models.CharField("Nombre servidor", max_length=200)
-    content_type = models.CharField("Tipo de contenido", max_length=100)
 
 class CategoryBlackListDomain(models.Model):
     name = models.CharField("Categoria", max_length=100)
 
     def __str__(self):
         return self.name.upper()
+
+
+# The parameter of search in logs squid
+class SearchParameterSquid(models.Model):
+    step_slice = models.IntegerField("Paso Slice")
+    start_slice = models.IntegerField("Inicio Slice")
+    end_slice = models.IntegerField("Fin Slice")
+    multiplier_slice = models.IntegerField("Multiplicador Slice")
+    category_black_list = models.ForeignKey(
+        CategoryBlackListDomain,
+        on_delete=models.CASCADE,
+        default=None
+    )
+    date_start = models.DateField("Fecha Inicial")
+    date_end = models.DateField("Fecha Final")
+    user = models.CharField("Usuario", max_length=50, default=None, blank=True)
+
+
+# Store the search made in logsSquid
+class LogsSquidTmp(models.Model):
+    parameter_search = models.OneToOneField(
+        SearchParameterSquid,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        default=None
+    )
+    log_squid = models.ForeignKey(
+        LogsSquid,
+        on_delete=models.CASCADE,
+        default=None
+    )
+
+
+
 
 
 class BlackListDomain(models.Model):
