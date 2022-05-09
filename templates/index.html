@@ -618,6 +618,38 @@
 							</li>
 						</ul>
 					</li>{% endcomment %}
+                    <li class="{% block active_open_usuario %}{% endblock active_open_usuario %}">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="menu-icon fa fa-user  "></i>
+                            <span class="menu-text"> Usuario </span>
+
+                            <b class="arrow fa fa-angle-down"></b>
+                        </a>
+
+                        <b class="arrow"></b>
+
+                        <ul class="submenu">
+                            <li class="{% block active_perfil_user%}{% endblock active_perfil_user%}">
+                                <a href="{% url 'analysis_squid_kerio:report_withoutuser' %}">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Perfil
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
+                        </ul>
+                        <ul class="submenu">
+                            <li class="{% block active_usuarios_user%}{% endblock active_usuarios_user%}">
+                                <a href="{% url 'analysis_squid_kerio:report' %}">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Usuarios
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
+                        </ul>
+
+                    </li>
                     <li class="{% block active_open_logs %}{% endblock active_open_logs %}">
                         <a href="#" class="dropdown-toggle">
                             <i class="menu-icon fa fa-book  "></i>
@@ -630,7 +662,7 @@
 
                         <ul class="submenu">
                             <li class="{% block active_logs%}{% endblock active_logs%}">
-                                <a href="{% url 'analysis_squid_kerio:report' %}">
+                                <a href="{% url 'analysis_squid_kerio:report_withoutuser' %}">
                                     <i class="menu-icon fa fa-caret-right"></i>
                                     Logs
                                 </a>

@@ -42,6 +42,21 @@ class FilterIncidenceForm(forms.Form):
     category = forms.ModelChoiceField(queryset=CategoryBlackListDomain.objects.all(), empty_label="Categoria", label="Categoria")
 
 
+class RangeDateForm(forms.Form):
+    StarDate = forms.DateField(label='Fecha Inicial', required=True,
+                               widget=forms.TextInput(
+                                   attrs={
+                                       'placeholder': 'Fecha Inicial',
+                                       'class': "form-control date-picker"
+                                   }))
+    EndDate = forms.DateField(label='Fecha Final',
+                              widget=forms.TextInput(
+                                  attrs={
+                                      'placeholder': 'Fecha Final',
+
+                                  }))
+
+
 class RangeDateUserForm(forms.Form):
     StarDate = forms.DateField(label='Fecha Inicial', required=True,
                                widget=forms.TextInput(

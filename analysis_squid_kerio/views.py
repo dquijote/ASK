@@ -2,12 +2,13 @@ from datetime import datetime
 # import datetime
 import math
 
+from django.core import paginator
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
-from analysis_squid_kerio.form import RangeDateUserForm
+from analysis_squid_kerio.form import RangeDateUserForm, RangeDateForm
 from analysis_squid_kerio.models import CategoryBlackListDomain
 from .models import LogsKerio, LogsSquid, BlackListDomain, SliceTmp, LogsSquidTmp,SearchParameterSquid
 
@@ -38,13 +39,103 @@ def index(request):
 #     return python_date
 
 
+def report_withoutuser(request):
+    form = RangeDateForm()
+
+    hidden_button_squid = request.GET.get('squid')
+    hidden_button_kerio = request.GET.get('kerio')
+
+    query = []
+    query_kerio = []
+
+    if hidden_button_squid == 'squid':
+        param_form_squid_first = request.GET.get('StarDate')
+        param_form_squid_end = request.GET.get('EndDate')
+        date_first_squid = datetime.strptime(param_form_squid_first, '%m/%d/%Y')
+        date_end_squid = datetime.strptime(param_form_squid_end, '%m/%d/%Y')
+
+        print("param_form_squid_end:" + param_form_squid_end)
+        print("param_form_squid_first: " + param_form_squid_first)
+        print("hidden_button_squid: " + hidden_button_squid)
+
+        print(date_first_squid)
+        print(date_end_squid)
+
+        query = LogsSquid.objects.filter(date_time__range=(date_first_squid, date_end_squid))
+    if hidden_button_kerio == 'kerio':
+        param_form_squid_first = request.GET.get('StarDate')
+        param_form_squid_end = request.GET.get('EndDate')
+        date_first_squid = datetime.strptime(param_form_squid_first, '%m/%d/%Y')
+        date_end_squid = datetime.strptime(param_form_squid_end, '%m/%d/%Y')
+
+        query_kerio = LogsKerio.objects.filter(date_time__range=(date_first_squid, date_end_squid))
+
+    paginator_squid = Paginator(query, 50)
+    paginator_kerio = Paginator(query_kerio, 50)
+
+    page_number = request.GET.get('page')
+    page_query_squid = paginator_squid.get_page(page_number)
+    page_query_kerio = paginator_kerio.get_page(page_number)
+
+    context = {'query': page_query_squid,
+               'query_kerio': page_query_kerio,
+               'form': form,
+
+               'param_form_squid_first': request.GET.get('StarDate'),
+               'param_form_squid_end': request.GET.get('EndDate'),
+
+               'param_form_squid_first': request.GET.get('StarDate'),
+               'param_form_squid_end': request.GET.get('EndDate')
+
+               }
+
+    return render(request, 'analysis_squid_kerio/ask_tables_withoutuser.html', context)
+
+
 def report(request):
-    form = RangeDateUserForm()
-    query = LogsSquid.objects.all()[:5]
-    query_kerio = LogsKerio.objects.all()[:5]
-    context = {'query': query,
-               'query_kerio': query_kerio,
-               'form': form
+    form = RangeDateUserForm(request.GET)
+    hidden_button_squid = request.GET.get('squid')
+    hidden_button_kerio = request.GET.get('kerio')
+
+    query = []
+    query_kerio = []
+
+    param_form_StartDate = request.GET.get('StarDate')
+    param_form_EndDate = request.GET.get('EndDate')
+    user_name = request.GET.get('user')
+    if hidden_button_squid == 'squid':
+
+        date_first_squid = datetime.strptime(param_form_StartDate, '%m/%d/%Y')
+        date_end_squid = datetime.strptime(param_form_EndDate, '%m/%d/%Y')
+        print('date_first_squid: ' + str(date_first_squid))
+        print('date_end_squid: ' + str(date_end_squid))
+        print('user_name: ' + str(user_name))
+
+        query = LogsSquid.objects.filter(date_time__range=(date_first_squid, date_end_squid)).filter(ip_client__contains=user_name)
+    if hidden_button_kerio == 'kerio':
+        # param_form_StartDate = request.GET.get('StarDate')
+        # param_form_EndDate = request.GET.get('EndDate')
+        date_first_squid = datetime.strptime(param_form_StartDate, '%m/%d/%Y')
+        date_end_squid = datetime.strptime(param_form_EndDate, '%m/%d/%Y')
+
+        query_kerio = LogsKerio.objects.filter(date_time__range=(date_first_squid, date_end_squid)).filter(
+            user_name__contains=user_name)
+
+    paginator_squid = Paginator(query, 50)
+    paginator_kerio = Paginator(query_kerio, 50)
+    page_number = request.GET.get('page')
+    page_query_squid = paginator_squid.get_page(page_number)
+    page_query_kerio = paginator_kerio.get_page(page_number)
+
+
+    context = {'query': page_query_squid,
+               'query_kerio': page_query_kerio,
+               'form': form,
+
+               'param_form_StartDate': param_form_StartDate,
+               'param_form_EndDate': param_form_EndDate,
+               'user_name': user_name
+
                }
 
     return render(request, 'analysis_squid_kerio/ask_tables.html', context)
