@@ -1,6 +1,8 @@
+from builtins import type
 from datetime import datetime
 # import datetime
 import math
+from itertools import count
 
 from django.core import paginator
 from django.shortcuts import render
@@ -9,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
 from analysis_squid_kerio.form import RangeDateUserForm, RangeDateForm
-from analysis_squid_kerio.models import CategoryBlackListDomain
+from analysis_squid_kerio.models import CategoryBlackListDomain, User
 from .models import LogsKerio, LogsSquid, BlackListDomain, SliceTmp, LogsSquidTmp,SearchParameterSquid
 
 from .form import filter_userForm, FilterIncidenceForm
@@ -22,6 +24,24 @@ def index(request):
     #return render(request, 'index.html')
     return render(request, 'analysis_squid_kerio/ask-index.html')
 
+
+def user_profile(request):
+    return render(request, 'analysis_squid_kerio/ask_user_profile.html')
+
+
+def list_user(request):
+    query_user = User.objects.all().order_by('name')
+
+    number_of_line = 50
+    paginator_user = Paginator(query_user, number_of_line)
+
+    page_number = request.GET.get('page')
+    page_paginator_user = paginator_user.get_page(page_number)  # Return a list with the element the page specified
+
+    context = {'user': page_paginator_user,
+               'page': page_number,
+    }
+    return render(request, 'analysis_squid_kerio/ask_user_list.html', context)
 
 # Convert date to python format
 # def convert_date(date):
@@ -153,9 +173,16 @@ def report_filter(request):
     # Control to look for individual user incidence
     user_ctrl = request.GET.get('user_ctrl')
 
-    # Category black list, is until when I find a solution to how make a filter with slice
-    category_black_list = CategoryBlackListDomain.objects.get(pk=2)
-    print("category black list : " + str(category_black_list))
+    # Category black list
+    category = request.GET.get('category')
+    category_black_list = []
+    count_category_black_list = 0
+    category_black_list_domain = []
+    if category is not None and category != "":
+        category_black_list = CategoryBlackListDomain.objects.get(pk=category)
+        category_black_list_domain = BlackListDomain.objects.filter(category=category)
+        count_category_black_list = category_black_list_domain.count()
+        print("category black list : " + str(category_black_list))
 
     # if request.method == 'POST':        #create a form instance and populate it with data from the request:
     form = filter_userForm()
@@ -182,10 +209,11 @@ def report_filter(request):
     date_start = request.GET.get('date_start')
     date_end = request.GET.get('date_end')
     print("type of date_end" + str(type(date_end)))
-    if date_start is not None:
+    print("type of date_end" + str(date_start))
+    if date_start is not None and date_start != "None" and date_start != "":
         date_start = datetime.strptime(date_start, '%m/%d/%Y')
         print("date start: " + str(date_start))
-    if date_end is not None:
+    if date_end is not None and date_end != "None" and date_end != "":
         date_end = datetime.strptime(date_end, '%m/%d/%Y')
         print("date end: " + str(date_end))
 
@@ -193,7 +221,6 @@ def report_filter(request):
     up_bl = request.GET.get('up_bl') # black list up
     down_bl = request.GET.get('down_bl') # black list down
 
-    allBlackList = BlackListDomain.objects.all()
 
     # Next iteration in the black list
     slice_get = SliceTmp.objects.get(pk=1)
@@ -407,7 +434,7 @@ def report_filter(request):
                         print("306, ")
 
 
-            print("309, search_for_do, dictonary" + str(search_for_do))
+            print("428, search_for_do, dictonary" + str(search_for_do))
 
             # Subtracting the searches done that are out on the bottom side
 
@@ -498,7 +525,6 @@ def report_filter(request):
 
     # Look for incidence into the logs squid
     queryIncidenceSquid = []
-    queryIncidenceKerio = []
 
     # Reset first time load
     if StartDateIncidence is None and page is None and user_cell is None and date_start is None:
@@ -510,18 +536,26 @@ def report_filter(request):
 
     list_incidence_squid = []
     list_incidence_kerio = []
+    print("request: " + str(request))
     print("-------incidence ctrl: " + str(incidence_ctrl))
     print("-------StartDateIncidence: " + str(StartDateIncidence))
+
+    b_list = BlackListDomain.objects.filter(category=category)[
+             SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
+
+    # Process the form without user
     if StartDateIncidence is not None and incidence_ctrl == 'active':
         query_squid = LogsSquid.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
         query_kerio = LogsKerio.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
         # [:SliceTmp.objects.get().end]
         # [:SliceTmp.objects.get().end]
 
-        b_list = BlackListDomain.objects.all()
+        # b_list = BlackListDomain.objects.filter(category=category)SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
         slice = SliceTmp.objects.get(pk=1)
 
-        blackListDomain = BlackListDomain.objects.all()[SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
+        print("b_list count: " + str(b_list.count()))
+
+        # blackListDomainCategory = BlackListDomain.objects.filter(category=category)
 
         print("------slice inicio:" + str(SliceTmp.objects.get(pk=1).start))
         print("------slice fin:" + str(SliceTmp.objects.get(pk=1).end))
@@ -529,10 +563,10 @@ def report_filter(request):
 
 
         #Reset entity slice
-        if b_list.count()/slice.multiplier < slice.step:
+        if category_black_list_domain.count()/slice.multiplier < slice.step:
             slice.start = 0
             slice.end = slice.multiplier
-            slice.step = 0
+            slice.step = 1
             slice.save()
 
 
@@ -541,16 +575,38 @@ def report_filter(request):
         #print("-------many of query_squid:" + str(query_squid.count()))
         # print("-------many of query_kerio:" + str(query_kerio.count()))
 
-
-        for bl in blackListDomain:
-            print("-------black objet:" + str(bl.domain))
+        for bl in b_list:
+            # print("query_squid: " + str(query_squid.count()))
             contains_incidence = query_squid.filter(url__contains=bl.domain).order_by('ip_client')
             if contains_incidence.count() > 0:
                 for obj_s in contains_incidence:
-                    log_squid_tmp = obj_s
-                    log_squid_tmp.save()
-                    print()
-                    #list_incidence_squid.append(obj_s)
+                    print("-------black objet:" + str(bl.domain))
+                    print("entro")
+                    list_incidence_squid.append(obj_s)
+
+        # Increase the value in temp slice
+        print("b_list count: " + str(b_list.count()))
+
+        if up_bl == 1 and category_black_list_domain.count()/slice.step <= slice.step + 1:
+            print("entro up_bl")
+            slice1 = SliceTmp.objects.get(pk=1)
+            slice1.start = slice1.start + slice1.multiplier
+            slice1.end = slice1.end + slice1.multiplier
+            slice1.step += 1
+            slice1.save()
+
+        # Decrease the value in temp slice
+        if down_bl == -1 and slice.step > 1:
+            print("entro down_bl")
+            slice1 = SliceTmp.objects.get(pk=1)
+            slice1.start = slice1.start + slice1.multiplier
+            slice1.end = slice1.end + slice1.multiplier
+            slice1.step -= 1
+            slice1.save()
+
+
+
+
 
 
 
@@ -574,11 +630,6 @@ def report_filter(request):
     page_number = request.GET.get('page')
     page_obj_kerio = paginator.get_page(page_number)
 
-    #print("--------Next page squid: " + str(page_obj_squid.next_page_number()))
-    print("--------Page:" + str(page_number))
-    print("--------StartDateIncidence:" + str(StartDateIncidence))
-    print("--------EndDateIncidence:" + str(EndDateIncidence))
-    #print("--------list kerio:" + str(page_obj_kerio.__len__()))
     if page_obj_squid.has_next():
         print("--------Paginator next page: " + str(page_obj_squid.next_page_number()))
     else:
@@ -601,8 +652,7 @@ def report_filter(request):
     if date_end != "None" and date_end is not None:
         date_end = str(date_end.month) + "/" + str(date_end.day) + "/" + str(date_end.year)
 
-
-    # redirect to a new URL:
+    # render to a URL:
     return render(request, 'analysis_squid_kerio/ask_tables_filter.html', {'form': form,
                                                                            'user_ctrl': user_ctrl,
                                                                            'incidence': userIncidenceForm,
@@ -612,11 +662,12 @@ def report_filter(request):
                                                                            'incidence_ctrl': incidence_ctrl,
                                                                            'StartDateIncidence': str(StartDateIncidence),
                                                                            'EndDateIncidence': str(EndDateIncidence),
+                                                                           'category': category,
                                                                            #'query': query,
                                                                            'query': page_obj_squid,
                                                                            'query_kerio': page_obj_kerio,
                                                                            'step': slice_get.step,
-                                                                           'totalIter': math.floor(allBlackList.count()/slice_get.multiplier) + 1})
+                                                                           'totalIter': math.floor(count_category_black_list/slice_get.multiplier) + 1})
 
 
 def report_filter_kerio(request):

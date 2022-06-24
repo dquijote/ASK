@@ -68,9 +68,6 @@ class LogsSquidTmp(models.Model):
     )
 
 
-
-
-
 class BlackListDomain(models.Model):
     fecha_entrada = models.DateTimeField("Fecha entrada")
     domain = models.CharField("Dominio", max_length=1000)
@@ -103,11 +100,11 @@ class User(models.Model):
     lastName1 = models.CharField("Primer Apellido", max_length=200)
     lastName2 = models.CharField("Segundo Apellido", max_length=200)
     mail = models.EmailField(primary_key=True)
-    planeData = models.IntegerField("Plan de Datos (MB)") #en mb
+    planeData = models.IntegerField("Plan de Datos (MB)")  # en mb
 
-    nacional = 'nac'
-    internacional = 'int'
-    correo = 'cor'
+    nacional = 'nacional'
+    internacional = 'internacional'
+    correo = 'correo'
 
     defaultSocial = 'Ninguno'
 
@@ -132,14 +129,15 @@ class User(models.Model):
     serviceTypeNavPC = models.CharField("Tipo de servicio Nav PC", choices=serviceNavPc, max_length=15, default=nacional)
     serviceTypeNavCell = models.CharField("Tipo de servicio Nav Cell", choices=serviceNavcell, max_length=15, default=internacional)
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE)
-    socialNetwork = models.CharField("Red social", max_length=2000, default=defaultSocial)
+    # socialNetwork = models.CharField("Red social", max_length=2000, default=defaultSocial)
     root = models.BooleanField("Permiso Admin", default=False)
     quickAnswer = models.BooleanField("Grup. Respueta Rapida", default=False)
 
     def __str__(self):
         return self.name + " " + self.lastName1 + " " + self.lastName2
 
-#Store the temp part from the slice
+
+# Store the temp part from the slice
 class SliceTmp(models.Model):
     start = models.IntegerField("Slice inicio")
     end = models.IntegerField("Slice fin")
@@ -148,3 +146,12 @@ class SliceTmp(models.Model):
 
     def __str__(self):
         return "incio:" + str(self.start) + " - " + "fin:" + str(self.end) + "paso:" + str(self.step)
+
+
+class SocialNetwork(models.Model):
+    worker = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_social_network = models.CharField("Id Red Social", max_length=500)
+    name = models.CharField("Nombre de red social", max_length=100)
+    description = models.CharField("Descripcion", max_length=300)
+
+

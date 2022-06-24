@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
+from analysis_squid_kerio.models import SocialNetwork
 from .models import LogsSquid
 from .models import LogsKerio
 from .models import Entity
@@ -17,3 +18,4 @@ admin.site.register(BlackListDomain)
 admin.site.register(SliceTmp)
 admin.site.register(CategoryBlackListDomain)
 admin.site.register(SearchParameterSquid)
+admin.site.register(SocialNetwork)

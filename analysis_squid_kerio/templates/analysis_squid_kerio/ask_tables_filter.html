@@ -183,15 +183,15 @@
                                                         </div>
 
                                                         <div style="margin-top: 2px">
-                                                            <button type="submit" class="btn btn-info btn-sm " >
+                                                            <button type="submit" class="btn btn-info btn-sm " name="user_ctrl" value="active">
                                                                 <i class="ace-icon fa fa-search bigger-110"></i>Buscar Usuario
                                                             </button>
                                                             <span class="label label-success arrowed-right">Iteracion</span>
                                                             <div class="btn-group">
     
-                                                                <a type="button" href="?user_ctrl={{ user_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&down_bl=-1" class="btn btn-white btn-sm btn-primary">Anterior</a>
+                                                                <a type="button" href="?user_ctrl={{ user_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&category={{ category }}&down_bl=-1" class="btn btn-white btn-sm btn-primary">Anterior</a>
                                                                 <button type="button"  class="btn btn-white btn-sm btn-primary">{{ step }} de {{ totalIter }}</button>
-                                                                <a type="button" href="?user_ctrl={{ user_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&up_bl=1" class="btn btn-white btn-sm btn-primary">Siguiente</a>
+                                                                <a type="button" href="?user_ctrl={{ user_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&category={{ category }}&up_bl=1" class="btn btn-white btn-sm btn-primary">Siguiente</a>
                                                             </div>
                                                         </div>
 													</form>
@@ -240,15 +240,15 @@
 
                                                         <input type="hidden" name="incidence_ctrl" value="active"/>
                                                         <div style="margin-top: 2px">
-                                                            <button type="submit" class="btn btn-info btn-sm " >
+                                                            <button type="submit" class="btn btn-info btn-sm " name="incidence_ctrl" value="active">
                                                                 <i class="ace-icon fa fa-search bigger-110"></i>Buscar Incidencias
                                                             </button>
                                                             <span class="label label-success arrowed-right">Iteracion</span>
                                                             <div class="btn-group">
 
-                                                                <a type="button" href="?incidence_ctrl={{ incidence_ctrl }}&StarIncidence={{StartDateIncidence}}&EndIncidence={{EndDateIncidence}}&down_bl=-1" class="btn btn-white btn-sm btn-primary">Anterior</a>
+                                                                <a type="button" href="?incidence_ctrl={{ incidence_ctrl }}&StarIncidence={{StartDateIncidence}}&EndIncidence={{EndDateIncidence}}&category={{ category }}&down_bl=-1" class="btn btn-white btn-sm btn-primary">Anterior</a>
                                                                 <button type="button"  class="btn btn-white btn-sm btn-primary">{{ step }} de {{ totalIter }}</button>
-                                                                <a type="button" href="?incidence_ctrl={{ incidence_ctrl }}&StarIncidence={{StartDateIncidence}}&EndIncidence={{EndDateIncidence}}&&up_bl=1" class="btn btn-white btn-sm btn-primary">Siguiente</a>
+                                                                <a type="button" href="?incidence_ctrl={{ incidence_ctrl }}&StarIncidence={{StartDateIncidence}}&EndIncidence={{EndDateIncidence}}&category={{ category }}&up_bl=1" class="btn btn-white btn-sm btn-primary">Siguiente</a>
                                                             </div>
                                                         </div>
 													</form>
@@ -322,7 +322,7 @@
 														</td>
 
 														<td>
-															{{ query1.time_stamp }}
+                                                            <p class="td-timestamp">{{ query1.time_stamp }}</p>
 
 														</td>
 														<td>{{ query1.date_time | date}}</td>
@@ -577,6 +577,9 @@
 		<!-- ace scripts -->
 		<script src="{% static 'analysis_squid_kerio/assets/js/ace-elements.min.js' %}"></script>
 		<script src="{% static 'analysis_squid_kerio/assets/js/ace.min.js' %}"></script>
+
+    <!-- MINE-->
+    <script src="{% static 'analysis_squid_kerio/assets/js_mine/js.js' %}"></script>
 {% endblock script_src%}
 
 {% block scrip %}
