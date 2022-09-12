@@ -77,8 +77,14 @@ WSGI_APPLICATION = 'logs_analysis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ask',
+        'USER': 'admin',
+        'PASSWORD': 'Admin123',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

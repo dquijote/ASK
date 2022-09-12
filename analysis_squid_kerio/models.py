@@ -4,7 +4,7 @@ from django.db import models
 
 
 class LogsKerio(models.Model):
-    ip_addres = models.GenericIPAddressField("IP")
+    ip_addres = models.PositiveBigIntegerField("IP")
     user_name = models.CharField("Usuario", max_length=200)
     date_time = models.DateTimeField("Fecha")
     time_zone = models.CharField("Zona horario", max_length=100)
@@ -19,8 +19,8 @@ class LogsKerio(models.Model):
 class LogsSquid(models.Model):
     time_stamp = models.CharField("Time Stamp", max_length=100, default=1627704012)
     date_time = models.DateTimeField("Fecha")
-    time_request = models.IntegerField("Duracion de consulta")
-    ip_client = models.GenericIPAddressField("Ip cliente")
+    time_request = models.BigIntegerField("Duracion de consulta")
+    ip_client = models.PositiveBigIntegerField("Ip cliente")
     cache_result_code = models.CharField("Codigo de cache", max_length=50)
     size_transfered = models.IntegerField("Tamanno de transf")
     http_method = models.CharField("Metodo http", max_length=50)

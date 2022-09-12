@@ -1,4 +1,4 @@
-from builtins import type
+from builtins import type, str
 from datetime import datetime
 # import datetime
 import math
@@ -190,6 +190,7 @@ def report_filter(request):
     form = filter_userForm(request.GET)
     userIncidenceForm = FilterIncidenceForm(request.GET)
 
+    #Take the send value
     StartDateIncidence = request.GET.get('StarIncidence')
     EndDateIncidence = request.GET.get('EndIncidence')
     print("EndDateIncidence: " + str(EndDateIncidence) + " and type:" + str(type(EndDateIncidence)))
@@ -210,6 +211,8 @@ def report_filter(request):
     date_end = request.GET.get('date_end')
     print("type of date_end" + str(type(date_end)))
     print("type of date_end" + str(date_start))
+
+    #Convert the data in a datetime objet
     if date_start is not None and date_start != "None" and date_start != "":
         date_start = datetime.strptime(date_start, '%m/%d/%Y')
         print("date start: " + str(date_start))
@@ -218,8 +221,8 @@ def report_filter(request):
         print("date end: " + str(date_end))
 
     page = request.GET.get('page')
-    up_bl = request.GET.get('up_bl') # black list up
-    down_bl = request.GET.get('down_bl') # black list down
+    up_bl = request.GET.get('up_bl')  # black list up
+    down_bl = request.GET.get('down_bl')  # black list down
 
 
     # Next iteration in the black list
@@ -248,6 +251,7 @@ def report_filter(request):
 
     print("user_ctrol: " + str(user_ctrl))
 
+    # The user part of a parameter
     if user_ctrl == 'active':
         print("----user control is active inside of if user_ctrl")
         query_user = LogsSquid.objects.filter(ip_client__contains=user_cell).filter(
@@ -268,6 +272,7 @@ def report_filter(request):
 
         search_for_do = {}
         print("145, param_with_user: " + str(param_with_user.count()))
+        #
         if param_with_user_all.count() > 0:
 
             date_made_first = ""
@@ -366,7 +371,6 @@ def report_filter(request):
                         print("221")
                         print("date_start.date()" + str(date_start.date()))
                         print("date_made_first.date_start" + str(date_made_first.date_start))
-
 
             # Interception for both side, above and below
             elif date_made_first is not None and date_made_first != "" and \
@@ -577,16 +581,22 @@ def report_filter(request):
 
         for bl in b_list:
             # print("query_squid: " + str(query_squid.count()))
-            contains_incidence = query_squid.filter(url__contains=bl.domain).order_by('ip_client')
+            print(" for bl in b_list:")
+            print("query_squid.count: " + query_squid.count())
+            contains_incidence = query_squid.filter(url__contains=bl.domain)  # .order_by('ip_client')
+            print(" paso:" + contains_incidence.first())
+            print("contains_incidence.count(): " + contains_incidence.__len__())
+            print("contains_incidence.count(): " + str(contains_incidence.count()))
             if contains_incidence.count() > 0:
-                for obj_s in contains_incidence:
-                    print("-------black objet:" + str(bl.domain))
-                    print("entro")
-                    list_incidence_squid.append(obj_s)
+                print("-------black objet:" + str(bl.domain))
+
+                # for obj_s in contains_incidence:
+                #     print("-------black objet:" + str(bl.domain))
+                #     print("entro")
+                #     list_incidence_squid.append(obj_s)
 
         # Increase the value in temp slice
         print("b_list count: " + str(b_list.count()))
-
         if up_bl == 1 and category_black_list_domain.count()/slice.step <= slice.step + 1:
             print("entro up_bl")
             slice1 = SliceTmp.objects.get(pk=1)
