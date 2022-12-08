@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
 from analysis_squid_kerio.form import RangeDateUserForm, RangeDateForm
-from analysis_squid_kerio.models import CategoryBlackListDomain, User
+from analysis_squid_kerio.models import CategoryBlackListDomain, User, LogsSquidPartitioned
 from .models import LogsKerio, LogsSquid, BlackListDomain, SliceTmp, LogsSquidTmp,SearchParameterSquid
 
 from .form import filter_userForm, FilterIncidenceForm
@@ -254,7 +254,7 @@ def report_filter(request):
     # The user part of a parameter
     if user_ctrl == 'active':
         print("----user control is active inside of if user_ctrl")
-        query_user = LogsSquid.objects.filter(ip_client__contains=user_cell).filter(
+        query_user = LogsSquidPartitioned.objects.filter(ip_client__contains=user_cell).filter(
             date_time__range=(date_start, date_end))
 
         black_list_to_user = BlackListDomain.objects.all()[
@@ -515,7 +515,7 @@ def report_filter(request):
         # belong it
         for a in search_made:
             parameter_search = LogsSquidTmp.objects.filter(parameter_search=a.id)
-            list_incidence_squid_user.append(LogsSquid.objects.filter(pk=parameter_search.get().log_squid.pk).get())
+            list_incidence_squid_user.append(LogsSquidPartitioned.objects.filter(pk=parameter_search.get().log_squid.pk).get())
 
         # for bl in black_list_to_user:
         #     print("-------black objet in user:" + str(bl.domain))
@@ -549,7 +549,7 @@ def report_filter(request):
 
     # Process the form without user
     if StartDateIncidence is not None and incidence_ctrl == 'active':
-        query_squid = LogsSquid.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
+        query_squid = LogsSquidPartitioned.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
         query_kerio = LogsKerio.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
         # [:SliceTmp.objects.get().end]
         # [:SliceTmp.objects.get().end]

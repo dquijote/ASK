@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.postgres",
+    "psqlextra",
 ]
 
 MIDDLEWARE = [
@@ -77,7 +79,7 @@ WSGI_APPLICATION = 'logs_analysis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'psqlextra.backend',
         'NAME': 'ask',
         'USER': 'admin',
         'PASSWORD': 'Admin123',
@@ -87,6 +89,8 @@ DATABASES = {
         # 'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+PSQLEXTRA_PARTITIONING_MANAGER = 'analysis_squid_kerio.partitioning.manager'
 
 
 # Password validation

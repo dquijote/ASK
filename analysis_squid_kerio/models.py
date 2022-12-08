@@ -1,5 +1,9 @@
 from django.db import models
 
+
+from psqlextra.types import PostgresPartitioningMethod
+from psqlextra.models import PostgresPartitionedModel
+
 # Create your models here.
 
 
@@ -14,6 +18,23 @@ class LogsKerio(models.Model):
     code_http = models.CharField("Codigo http", max_length=200)
     size_transfered = models.IntegerField("Tamanno de transf")
     count_requests_transferred = models.CharField("Cant de transferencia", max_length=1000)
+
+
+class LogsSquidPartitioned(PostgresPartitionedModel):
+    class PartitioningMeta:
+        method = PostgresPartitioningMethod.RANGE
+        key = ["date_time"]
+    time_stamp = models.CharField("Time Stamp", max_length=100, default=1627704012)
+    date_time = models.DateTimeField("Fecha")
+    time_request = models.BigIntegerField("Duracion de consulta")
+    ip_client = models.PositiveBigIntegerField("Ip cliente")
+    cache_result_code = models.CharField("Codigo de cache", max_length=50)
+    size_transfered = models.IntegerField("Tamanno de transf")
+    http_method = models.CharField("Metodo http", max_length=50)
+    url = models.CharField("Url", max_length=10000)
+    user_name = models.CharField("Usuario", max_length=200)
+    request_server_name = models.CharField("Nombre servidor", max_length=200)
+    content_type = models.CharField("Tipo de contenido", max_length=100)
 
 
 class LogsSquid(models.Model):
