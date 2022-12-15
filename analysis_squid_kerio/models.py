@@ -36,6 +36,9 @@ class LogsSquidPartitioned(PostgresPartitionedModel):
     request_server_name = models.CharField("Nombre servidor", max_length=200)
     content_type = models.CharField("Tipo de contenido", max_length=100)
 
+    def __str__(self):
+        return str(self.ip_client)
+
 
 class LogsSquid(models.Model):
     time_stamp = models.CharField("Time Stamp", max_length=100, default=1627704012)

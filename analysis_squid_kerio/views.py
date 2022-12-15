@@ -161,8 +161,8 @@ def report(request):
     return render(request, 'analysis_squid_kerio/ask_tables.html', context)
 
 
-def sortList(e):
-    return e['ip_client']
+def sortListLogSquidObj(e):
+    return e.ip_client
 
 
 # Show the diferent filter (SQUID)
@@ -251,7 +251,7 @@ def report_filter(request):
 
     print("user_ctrol: " + str(user_ctrl))
 
-    # The user part of a parameter
+    # Search with user, part of a parameter
     if user_ctrl == 'active':
         print("----user control is active inside of if user_ctrl")
         query_user = LogsSquidPartitioned.objects.filter(ip_client__contains=user_cell).filter(
@@ -290,6 +290,9 @@ def report_filter(request):
                 if date_start.date() < iter1.date_start < date_end.date() and \
                      iter1.date_start < date_end.date() < iter1.date_end:
                     date_made_first = iter1
+
+
+
                     print("Line 160, date_made_first assignment value: " + str(date_made_first))
                     break
 
@@ -547,79 +550,6 @@ def report_filter(request):
     b_list = BlackListDomain.objects.filter(category=category)[
              SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
 
-    # Process the form without user
-    if StartDateIncidence is not None and incidence_ctrl == 'active':
-        query_squid = LogsSquidPartitioned.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
-        query_kerio = LogsKerio.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
-        # [:SliceTmp.objects.get().end]
-        # [:SliceTmp.objects.get().end]
-
-        # b_list = BlackListDomain.objects.filter(category=category)SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
-        slice = SliceTmp.objects.get(pk=1)
-
-        print("b_list count: " + str(b_list.count()))
-
-        # blackListDomainCategory = BlackListDomain.objects.filter(category=category)
-
-        print("------slice inicio:" + str(SliceTmp.objects.get(pk=1).start))
-        print("------slice fin:" + str(SliceTmp.objects.get(pk=1).end))
-
-
-
-        #Reset entity slice
-        if category_black_list_domain.count()/slice.multiplier < slice.step:
-            slice.start = 0
-            slice.end = slice.multiplier
-            slice.step = 1
-            slice.save()
-
-
-        list_tmp_incidence = []
-
-        #print("-------many of query_squid:" + str(query_squid.count()))
-        # print("-------many of query_kerio:" + str(query_kerio.count()))
-
-        for bl in b_list:
-            # print("query_squid: " + str(query_squid.count()))
-            print(" for bl in b_list:")
-            print("query_squid.count: " + query_squid.count())
-            contains_incidence = query_squid.filter(url__contains=bl.domain)  # .order_by('ip_client')
-            print(" paso:" + contains_incidence.first())
-            print("contains_incidence.count(): " + contains_incidence.__len__())
-            print("contains_incidence.count(): " + str(contains_incidence.count()))
-            if contains_incidence.count() > 0:
-                print("-------black objet:" + str(bl.domain))
-
-                # for obj_s in contains_incidence:
-                #     print("-------black objet:" + str(bl.domain))
-                #     print("entro")
-                #     list_incidence_squid.append(obj_s)
-
-        # Increase the value in temp slice
-        print("b_list count: " + str(b_list.count()))
-        if up_bl == 1 and category_black_list_domain.count()/slice.step <= slice.step + 1:
-            print("entro up_bl")
-            slice1 = SliceTmp.objects.get(pk=1)
-            slice1.start = slice1.start + slice1.multiplier
-            slice1.end = slice1.end + slice1.multiplier
-            slice1.step += 1
-            slice1.save()
-
-        # Decrease the value in temp slice
-        if down_bl == -1 and slice.step > 1:
-            print("entro down_bl")
-            slice1 = SliceTmp.objects.get(pk=1)
-            slice1.start = slice1.start + slice1.multiplier
-            slice1.end = slice1.end + slice1.multiplier
-            slice1.step -= 1
-            slice1.save()
-
-
-
-
-
-
-
     # Paginator Squid User
     #if user_ctrl == 'active':
     paginator = Paginator(list_incidence_squid_user, 35)
@@ -678,6 +608,185 @@ def report_filter(request):
                                                                            'query_kerio': page_obj_kerio,
                                                                            'step': slice_get.step,
                                                                            'totalIter': math.floor(count_category_black_list/slice_get.multiplier) + 1})
+
+
+# Filter log looking for incidence without user parameter
+def reportFilterSquidDate(request):
+    # Control to look for incidence, with out user, just interval of date
+    incidence_ctrl = request.GET.get('incidence_ctrl')
+    # Control to look for individual user incidence
+    user_ctrl = request.GET.get('user_ctrl')
+    # Category black list
+    category = request.GET.get('category')
+
+    user_cell = request.GET.get('user_cell')
+    date_start = request.GET.get('date_start')
+    date_end = request.GET.get('date_end')
+
+    slice_get = SliceTmp.objects.get(pk=1)
+
+    page = request.GET.get('page')
+    up_bl = request.GET.get('up_bl')  # black list up
+    down_bl = request.GET.get('down_bl')  # black list down
+
+    # Taking just the category selected (Black list)
+    category_black_list = []
+    count_category_black_list = 0
+    category_black_list_domain = []
+    if category is not None and category != "":
+        category_black_list = CategoryBlackListDomain.objects.get(pk=category)
+        category_black_list_domain = BlackListDomain.objects.filter(category=category)
+        count_category_black_list = category_black_list_domain.count()
+        print("category black list : " + str(category_black_list))
+
+    form = filter_userForm(request.GET)
+    userIncidenceForm = FilterIncidenceForm(request.GET)
+
+
+
+    # Take the send value
+    StartDateIncidence = request.GET.get('StarIncidence')
+    EndDateIncidence = request.GET.get('EndIncidence')
+    print("EndDateIncidence: " + str(EndDateIncidence) + " and type:" + str(type(EndDateIncidence)))
+    print("StartDateIncidence: " + str(StartDateIncidence) + " and type:" + str(type(StartDateIncidence)))
+
+    print("page: " + str(page))
+    #  Formating date From the form
+    if StartDateIncidence != "None" and StartDateIncidence is not None:
+        StartDateIncidence = datetime.strptime(request.GET.get('StarIncidence'), '%m/%d/%Y')
+        StartDateIncidence = StartDateIncidence.date()
+        print("converted datime: " + str(StartDateIncidence))
+        # StartDateIncidence = request.GET.get('StarIncidence')
+    if EndDateIncidence != "None" and EndDateIncidence is not None:
+        # EndDateIncidence = convert_date(request.GET.get('EndIncidence'))
+        EndDateIncidence = datetime.strptime(request.GET.get('EndIncidence'), '%m/%d/%Y')
+        EndDateIncidence = EndDateIncidence.date()
+        # EndDateIncidence = datetime.date(EndDateIncidence.year, EndDateIncidence.month, EndDateIncidence.day)
+
+
+    # Process the form without user
+    if StartDateIncidence is not None:
+        query_squid = LogsSquidPartitioned.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
+        query_kerio = LogsKerio.objects.filter(date_time__range=(StartDateIncidence, EndDateIncidence))
+        # [:SliceTmp.objects.get().end]
+        # [:SliceTmp.objects.get().end]
+
+        # b_list = BlackListDomain.objects.filter(category=category)SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
+        slice = SliceTmp.objects.get(pk=1)
+
+        # print("b_list count: " + str(b_list.count()))
+
+        # blackListDomainCategory = BlackListDomain.objects.filter(category=category)
+
+        print("------slice inicio:" + str(SliceTmp.objects.get(pk=1).start))
+        print("------slice fin:" + str(SliceTmp.objects.get(pk=1).end))
+
+        # Reset entity slice
+        if category_black_list_domain.count() / slice.multiplier < slice.step:
+            slice.start = 0
+            slice.end = slice.multiplier
+            slice.step = 1
+            slice.save()
+
+            # Next iteration in the black list
+        slice_get = SliceTmp.objects.get(pk=1)
+        if up_bl is not None:
+            black_list_slice = BlackListDomain.objects.all()
+            if black_list_slice.count() / slice_get.multiplier > slice_get.step:
+                slice_get.start = slice_get.start + slice_get.multiplier
+                slice_get.end = slice_get.end + slice_get.multiplier
+                slice_get.step = slice_get.step + 1
+                slice_get.save()
+                print("-------Page is None, the step is up")
+                print("-------Black list total:" + str(black_list_slice.count()))
+                print("-------Black list / multiplier:" + str(black_list_slice.count() / slice_get.multiplier))
+        if down_bl is not None:
+            if slice_get.end > slice_get.multiplier:
+                slice_get.start = slice_get.start - slice_get.multiplier
+                slice_get.end = slice_get.end - slice_get.multiplier
+                slice_get.step = slice_get.step - 1
+                slice_get.save()
+                print("-------In the slice, step is down")
+                print('slice_get.start' + str(slice_get.start))
+                print('slice_get.end' + str(slice_get.end))
+                print(' slice_get.step' + str( slice_get.step))
+
+        b_list = BlackListDomain.objects.filter(category=category)[
+                 SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
+
+        list_tmp_incidence = []
+
+        # List incidence to show in template
+        list_incidence_squid = []
+
+        # print("-------many of query_squid:" + str(query_squid.count()))
+        # print("-------many of query_kerio:" + str(query_kerio.count()))
+
+        for bl in b_list:
+            # print("query_squid: " + str(query_squid.count()))
+            print(" for bl in b_list:")
+            print("query_squid.count: " + str(query_squid.count()))
+            contains_incidence = query_squid.filter(url__contains=bl.domain)  # .order_by('ip_client')
+            print(" paso:" + str(contains_incidence.first()))
+            print("contains_incidence.count(): " + str(contains_incidence.__len__()))
+            print("contains_incidence.count(): " + str(contains_incidence.count()))
+            if contains_incidence.count() > 0:
+                print("-------black objet:" + str(bl.domain))
+
+                for obj_s in contains_incidence:
+                    print("-------black objet:" + str(bl.domain))
+                    print("entro")
+                    list_incidence_squid.append(obj_s)
+
+        list_incidence_squid.sort(key=sortListLogSquidObj)
+
+        # Increase the value in temp slice
+        print("b_list count: " + str(b_list.count()))
+        # if up_bl == 1 and category_black_list_domain.count() / slice.step <= slice.step + 1:
+        #     print("entro up_bl")
+        #     slice1 = SliceTmp.objects.get(pk=1)
+        #     slice1.start = slice1.start + slice1.multiplier
+        #     slice1.end = slice1.end + slice1.multiplier
+        #     slice1.step += 1
+        #     slice1.save()
+        #
+        # # Decrease the value in temp slice
+        # if down_bl == -1 and slice.step > 1:
+        #     print("entro down_bl")
+        #     slice1 = SliceTmp.objects.get(pk=1)
+        #     slice1.start = slice1.start - slice1.multiplier
+        #     slice1.end = slice1.end - slice1.multiplier
+        #     slice1.step -= 1
+        #     slice1.save()
+
+        # Paginator Squid
+        paginator = Paginator(list_incidence_squid, 35)  # Show 25 contacts per page.
+        page_number = request.GET.get('page')
+        page_obj_squid = paginator.get_page(page_number)
+
+        # Format to jquery format
+        StartDateIncidence = str(StartDateIncidence.month) + '/' + str(StartDateIncidence.day) + '/' + str(StartDateIncidence.year)
+        EndDateIncidence = str(EndDateIncidence.month) + '/' + str(EndDateIncidence.day) + '/' + str(EndDateIncidence.year)
+
+        # render to a URL:
+        return render(request, 'analysis_squid_kerio/ask_tables_filter.html', {'form': form,
+                                                                               'user_ctrl': user_ctrl,
+                                                                               'incidence': userIncidenceForm,
+                                                                               # 'user_cell': user_cell,
+                                                                               'date_start': date_start,
+                                                                               'date_end': date_end,
+                                                                               'incidence_ctrl': incidence_ctrl,
+                                                                               'StartDateIncidence': str(
+                                                                                   StartDateIncidence),
+                                                                               'EndDateIncidence': str(
+                                                                                   EndDateIncidence),
+                                                                               'category': category,
+                                                                               # 'query': query,
+                                                                               'query': page_obj_squid,
+                                                                               # 'query_kerio': page_obj_kerio,
+                                                                               'step': slice_get.step,
+                                                                               'totalIter': math.floor(
+                                                                                   count_category_black_list / slice_get.multiplier) + 1})
 
 
 def report_filter_kerio(request):

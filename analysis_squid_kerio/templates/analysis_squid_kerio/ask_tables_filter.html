@@ -212,7 +212,7 @@
 
 											<div class="widget-body">
 												<div class="widget-main " data-inline-type="true">
-													<form class="form-horizontal" action="{% url 'analysis_squid_kerio:report_filter' %}" method="get">
+													<form class="form-horizontal" action="{% url 'analysis_squid_kerio:report_filter_date' %}" method="get">
 														{% csrf_token %}
 														{{ incidence.non_field_errors }}
 															{{ incidence.subject }}
@@ -399,15 +399,15 @@
 								<div class="pagination">
                                     <span class="step-links">
                                     {% if query.has_previous %}
-                                        <a href="?page=1&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}">&laquo; first</a>
-                                        <a href="?page={{ query.previous_page_number }}&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}">previous</a>
+                                        <a href="?page=1&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}&category={{ category }}">&laquo; first</a>
+                                        <a href="?page={{ query.previous_page_number }}&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}&category={{ category }}">previous</a>
                                     {% endif %}
                                     <span class="current">
                                         Pagina {{ query.number }} de {{ query.paginator.num_pages }}.
                                     </span>
                                     {% if query.has_next %}
-                                        <a href="?page={{ query.next_page_number }}&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}">next</a>
-                                        <a href="?page={{ query.paginator.num_pages }}&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}">last &raquo;</a>
+                                        <a href="?page={{ query.next_page_number }}&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}&category={{ category }}">next</a>
+                                        <a href="?page={{ query.paginator.num_pages }}&user_ctrl={{ user_ctrl }}&incidence_ctrl={{ incidence_ctrl }}&user_cell={{user_cell}}&date_start={{date_start}}&date_end={{date_end}}&StarIncidence={{ StartDateIncidence }}&EndIncidence={{ EndDateIncidence }}&category={{ category }}">last &raquo;</a>
                                     {% endif %}
                                     </span>
                                 </div>
