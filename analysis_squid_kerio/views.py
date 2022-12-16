@@ -131,7 +131,7 @@ def report(request):
         print('date_end_squid: ' + str(date_end_squid))
         print('user_name: ' + str(user_name))
 
-        query = LogsSquid.objects.filter(date_time__range=(date_first_squid, date_end_squid)).filter(ip_client__contains=user_name)
+        query = LogsSquidPartitioned.objects.filter(date_time__range=(date_first_squid, date_end_squid)).filter(ip_client__contains=user_name)
     if hidden_button_kerio == 'kerio':
         # param_form_StartDate = request.GET.get('StarDate')
         # param_form_EndDate = request.GET.get('EndDate')
@@ -166,7 +166,7 @@ def sortListLogSquidObj(e):
 
 
 # Show the diferent filter (SQUID)
-def report_filter(request):
+def report_filter(request) :
 
     # Control to look for incidence, with out user, just interval of date
     incidence_ctrl = request.GET.get('incidence_ctrl')
@@ -306,123 +306,123 @@ def report_filter(request):
             no_search_made = True  #
             search_done = False  # The Search is done
 
-            if date_made_end is not None and date_made_end != "":
-                cont = 0
-                for iter in range(0, len(param_with_user)):
-                    if param_with_user.count() == 1:
-                        search_for_do[param_with_user[iter].date_end] = date_end.date()
-                for iter in range(0, len(param_with_user)):
-                    # Interception above, the second part of interval is out
-                    if date_made_end.date_end <= param_with_user[iter].date_start <= date_end.date() and \
-                            date_made_end.date_end <= param_with_user[iter].date_end <= date_end.date():
-                        # If 1st searches done don't start like the interval
-                        cont += 1
-                        print("188 cont: " + str(cont))
-                        if cont == 1 and date_made_end.date_end < param_with_user[iter].date_start:
-                            search_for_do[date_made_end.date_end] = param_with_user[iter].date_start
-                            no_search_made = False
-                        if iter + 1 < len(param_with_user):
-                            if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
-                                search_for_do[param_with_user[iter].date_end] = param_with_user[
-                                    iter + 1].date_start
-                                no_search_made = False
-                                # If last searches done don't end like the end  of the interval
-                            if iter == len(param_with_user) and date_end.date() > param_with_user[iter].date_end:
-                                search_for_do[param_with_user[iter].date_end] = date_end.date()
-                                no_search_made = False
-                    else:
-                        search_for_do[date_made_end.date_end] = date_end.date()
-                        no_search_made = False
-                        print("Line 200")
-
-            elif date_made_first is not None and date_made_first != "":
-                cont = 0
-
-                for iter in range(0, len(param_with_user)):
-                    print("param_with_user[iter].date_start: " + str(param_with_user[iter].date_start))
-                    print("param_with_user[iter].date_end: " + str(param_with_user[iter].date_end))
-                    # Interception bottom, the first part of interval is out
-                    if date_start.date() <= param_with_user[iter].date_start <= date_made_first.date_start and \
-                            date_start.date() <= param_with_user[iter].date_end <= date_made_first.date_start:
-                        cont += 1
-                        print("205")
-                        print("cont: " + str(cont))
-                        # If 1st searches done don't start like the interval
-                        if cont == 1 and date_start.date() < param_with_user[iter].date_start:
-                            search_for_do[date_start.date()] = param_with_user[iter].date_start
-                            no_search_made = False
-                            print("210")
-                            print("date_start.date()" + str(date_start.date()))
-                            print("param_with_user[iter].date_start" + str(param_with_user[iter].date_start))
-                        if iter + 1 < len(param_with_user):
-                            if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
-                                search_for_do[param_with_user[iter].date_end] = param_with_user[iter + 1].date_start
-                                no_search_made = False
-                                print("214")
-                                print("param_with_user[iter].date_end" + str(param_with_user[iter].date_end))
-                                print("param_with_user[iter + 1].date_start" + str(param_with_user[iter + 1].date_start))
-                            # If last searches done don't end like the end  of the interval
-                        if iter == len(param_with_user) and date_end.date() > param_with_user[iter].date_end:
-                            search_for_do[param_with_user[iter].date_end] = date_end.date()
-                            no_search_made = False
-                            print("218")
-                            print("param_with_user[iter].date_end" + str(param_with_user[iter].date_end))
-                            print("date_end.date()" + str(date_end.date()))
-                    else:
-                        search_for_do[date_start.date()] = date_made_first.date_start
-                        no_search_made = False
-                        print("221")
-                        print("date_start.date()" + str(date_start.date()))
-                        print("date_made_first.date_start" + str(date_made_first.date_start))
-
-            # Interception for both side, above and below
-            elif date_made_first is not None and date_made_first != "" and \
-                    date_made_end is not None and date_made_end != "":
-                for iter in range(0, len(param_with_user) - 1):
-                    # Interception for both side, above and below
-                    if date_made_first.date_end.date() <= param_with_user[iter].date_start <= date_made_first.date_start.date() and \
-                            date_made_first.date_end.date() <= param_with_user[iter].date_end <= date_made_first.date_start.date():
-                        # If 1st searches done don't start like the interval
-                        if iter == 0 and date_start.date() < param_with_user[iter].date_start:
-                            search_for_do[date_start.date()] = param_with_user[iter].date_start
-                            no_search_made = False
-                        if iter + 1 <= len(param_with_user):
-                            if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
-                                search_for_do[param_with_user[iter].date_end] = param_with_user[iter + 1].date_start
-                                no_search_made = False
-                        # If last searches done don't end like the end  of the interval
-                        if iter == len(param_with_user) - 1 and date_end.date() > param_with_user[iter].date_end:
-                            search_for_do[param_with_user[iter].date_end] = date_end.date()
-                            no_search_made = False
-
-            # All interseption are inside
-            else:
-
-                for iter in range(0, len(param_with_user)):
-                    # The made is done
-                    if param_with_user[iter].date_start <= date_start.date() < param_with_user[iter].date_end and \
-                            param_with_user[iter].date_start < date_end.date() <= param_with_user[iter].date_end:
-                        date_start_done = param_with_user[iter].date_start
-                        date_end_done = param_with_user[iter].date_end
-                        no_search_made = False
-                        search_done = True
-                        print("278, the search is done")
-                        break
-                    if date_start.date() <= param_with_user[iter].date_start <= date_end.date() and \
-                    date_start.date() <= param_with_user[iter].date_end <= date_end.date():
-                        # If 1st searches done don't start like the interval
-                        print("283, ")
-                        if iter == 0 and date_start.date() < param_with_user[iter].date_start:
-                            search_for_do[date_start.date()] = param_with_user[iter].date_start
-                            no_search_made = False
-                        if iter + 1 < len(param_with_user):
-                            if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
-                                search_for_do[param_with_user[iter].date_end] = param_with_user[iter + 1].date_start
-                                no_search_made = False
-                                # If last searches done don't end like the end  of the interval
-                        if iter == len(param_with_user) - 1 and date_end.date() > param_with_user[iter].date_end:
-                            search_for_do[param_with_user[iter].date_end] = date_end.date()
-                            no_search_made = False
+            # if date_made_end is not None and date_made_end != "":
+            #     cont = 0
+            #     for iter in range(0, len(param_with_user)):
+            #         if param_with_user.count() == 1:
+            #             search_for_do[param_with_user[iter].date_end] = date_end.date()
+            #     for iter in range(0, len(param_with_user)):
+            #         # Interception above, the second part of interval is out
+            #         if date_made_end.date_end <= param_with_user[iter].date_start <= date_end.date() and \
+            #                 date_made_end.date_end <= param_with_user[iter].date_end <= date_end.date():
+            #             # If 1st searches done don't start like the interval
+            #             cont += 1
+            #             print("188 cont: " + str(cont))
+            #             if cont == 1 and date_made_end.date_end < param_with_user[iter].date_start:
+            #                 search_for_do[date_made_end.date_end] = param_with_user[iter].date_start
+            #                 no_search_made = False
+            #             if iter + 1 < len(param_with_user):
+            #                 if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
+            #                     search_for_do[param_with_user[iter].date_end] = param_with_user[
+            #                         iter + 1].date_start
+            #                     no_search_made = False
+            #                     # If last searches done don't end like the end  of the interval
+            #                 if iter == len(param_with_user) and date_end.date() > param_with_user[iter].date_end:
+            #                     search_for_do[param_with_user[iter].date_end] = date_end.date()
+            #                     no_search_made = False
+            #         else:
+            #             search_for_do[date_made_end.date_end] = date_end.date()
+            #             no_search_made = False
+            #             print("Line 200")
+            #
+            # elif date_made_first is not None and date_made_first != "":
+            #     cont = 0
+            #
+            #     for iter in range(0, len(param_with_user)):
+            #         print("param_with_user[iter].date_start: " + str(param_with_user[iter].date_start))
+            #         print("param_with_user[iter].date_end: " + str(param_with_user[iter].date_end))
+            #         # Interception bottom, the first part of interval is out
+            #         if date_start.date() <= param_with_user[iter].date_start <= date_made_first.date_start and \
+            #                 date_start.date() <= param_with_user[iter].date_end <= date_made_first.date_start:
+            #             cont += 1
+            #             print("205")
+            #             print("cont: " + str(cont))
+            #             # If 1st searches done don't start like the interval
+            #             if cont == 1 and date_start.date() < param_with_user[iter].date_start:
+            #                 search_for_do[date_start.date()] = param_with_user[iter].date_start
+            #                 no_search_made = False
+            #                 print("210")
+            #                 print("date_start.date()" + str(date_start.date()))
+            #                 print("param_with_user[iter].date_start" + str(param_with_user[iter].date_start))
+            #             if iter + 1 < len(param_with_user):
+            #                 if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
+            #                     search_for_do[param_with_user[iter].date_end] = param_with_user[iter + 1].date_start
+            #                     no_search_made = False
+            #                     print("214")
+            #                     print("param_with_user[iter].date_end" + str(param_with_user[iter].date_end))
+            #                     print("param_with_user[iter + 1].date_start" + str(param_with_user[iter + 1].date_start))
+            #                 # If last searches done don't end like the end  of the interval
+            #             if iter == len(param_with_user) and date_end.date() > param_with_user[iter].date_end:
+            #                 search_for_do[param_with_user[iter].date_end] = date_end.date()
+            #                 no_search_made = False
+            #                 print("218")
+            #                 print("param_with_user[iter].date_end" + str(param_with_user[iter].date_end))
+            #                 print("date_end.date()" + str(date_end.date()))
+            #         else:
+            #             search_for_do[date_start.date()] = date_made_first.date_start
+            #             no_search_made = False
+            #             print("221")
+            #             print("date_start.date()" + str(date_start.date()))
+            #             print("date_made_first.date_start" + str(date_made_first.date_start))
+            #
+            # # Interception for both side, above and below
+            # elif date_made_first is not None and date_made_first != "" and \
+            #         date_made_end is not None and date_made_end != "":
+            #     for iter in range(0, len(param_with_user) - 1):
+            #         # Interception for both side, above and below
+            #         if date_made_first.date_end.date() <= param_with_user[iter].date_start <= date_made_first.date_start.date() and \
+            #                 date_made_first.date_end.date() <= param_with_user[iter].date_end <= date_made_first.date_start.date():
+            #             # If 1st searches done don't start like the interval
+            #             if iter == 0 and date_start.date() < param_with_user[iter].date_start:
+            #                 search_for_do[date_start.date()] = param_with_user[iter].date_start
+            #                 no_search_made = False
+            #             if iter + 1 <= len(param_with_user):
+            #                 if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
+            #                     search_for_do[param_with_user[iter].date_end] = param_with_user[iter + 1].date_start
+            #                     no_search_made = False
+            #             # If last searches done don't end like the end  of the interval
+            #             if iter == len(param_with_user) - 1 and date_end.date() > param_with_user[iter].date_end:
+            #                 search_for_do[param_with_user[iter].date_end] = date_end.date()
+            #                 no_search_made = False
+            #
+            # # All interseption are inside
+            # else:
+            #
+            #     for iter in range(0, len(param_with_user)):
+            #         # The made is done
+            #         if param_with_user[iter].date_start <= date_start.date() < param_with_user[iter].date_end and \
+            #                 param_with_user[iter].date_start < date_end.date() <= param_with_user[iter].date_end:
+            #             date_start_done = param_with_user[iter].date_start
+            #             date_end_done = param_with_user[iter].date_end
+            #             no_search_made = False
+            #             search_done = True
+            #             print("278, the search is done")
+            #             break
+            #         if date_start.date() <= param_with_user[iter].date_start <= date_end.date() and \
+            #         date_start.date() <= param_with_user[iter].date_end <= date_end.date():
+            #             # If 1st searches done don't start like the interval
+            #             print("283, ")
+            #             if iter == 0 and date_start.date() < param_with_user[iter].date_start:
+            #                 search_for_do[date_start.date()] = param_with_user[iter].date_start
+            #                 no_search_made = False
+            #             if iter + 1 < len(param_with_user):
+            #                 if param_with_user[iter].date_end < param_with_user[iter + 1].date_start:
+            #                     search_for_do[param_with_user[iter].date_end] = param_with_user[iter + 1].date_start
+            #                     no_search_made = False
+            #                     # If last searches done don't end like the end  of the interval
+            #             if iter == len(param_with_user) - 1 and date_end.date() > param_with_user[iter].date_end:
+            #                 search_for_do[param_with_user[iter].date_end] = date_end.date()
+            #                 no_search_made = False
 
             # No search made
             if no_search_made:
@@ -773,6 +773,184 @@ def reportFilterSquidDate(request):
                                                                                'user_ctrl': user_ctrl,
                                                                                'incidence': userIncidenceForm,
                                                                                # 'user_cell': user_cell,
+                                                                               'date_start': date_start,
+                                                                               'date_end': date_end,
+                                                                               'incidence_ctrl': incidence_ctrl,
+                                                                               'StartDateIncidence': str(
+                                                                                   StartDateIncidence),
+                                                                               'EndDateIncidence': str(
+                                                                                   EndDateIncidence),
+                                                                               'category': category,
+                                                                               # 'query': query,
+                                                                               'query': page_obj_squid,
+                                                                               # 'query_kerio': page_obj_kerio,
+                                                                               'step': slice_get.step,
+                                                                               'totalIter': math.floor(
+                                                                                   count_category_black_list / slice_get.multiplier) + 1})
+
+
+def report_filterDateUserSquid(request):
+    # Control to look for incidence, with out user, just interval of date
+    incidence_ctrl = request.GET.get('incidence_ctrl')
+    # Control to look for individual user incidence
+    user_ctrl = request.GET.get('user_ctrl')
+    # Category black list
+    category = request.GET.get('category')
+
+    user_cell = request.GET.get('user_cell')
+    date_start = request.GET.get('date_start')
+    date_end = request.GET.get('date_end')
+
+    slice_get = SliceTmp.objects.get(pk=1)
+
+    page = request.GET.get('page')
+    up_bl = request.GET.get('up_bl')  # black list up
+    down_bl = request.GET.get('down_bl')  # black list down
+
+    # Taking just the category selected (Black list)
+    category_black_list = []
+    count_category_black_list = 0
+    category_black_list_domain = []
+    if category is not None and category != "":
+        category_black_list = CategoryBlackListDomain.objects.get(pk=category)
+        category_black_list_domain = BlackListDomain.objects.filter(category=category)
+        count_category_black_list = category_black_list_domain.count()
+        print("category black list : " + str(category_black_list))
+
+    form = filter_userForm(request.GET)
+    userIncidenceForm = FilterIncidenceForm(request.GET)
+
+    # Take the send value
+    StartDateIncidence = request.GET.get('StarIncidence')
+    EndDateIncidence = request.GET.get('EndIncidence')
+    print("EndDateIncidence: " + str(EndDateIncidence) + " and type:" + str(type(EndDateIncidence)))
+    print("StartDateIncidence: " + str(StartDateIncidence) + " and type:" + str(type(StartDateIncidence)))
+
+    print("page: " + str(page))
+    #  Formating date From the form
+    if date_start != "None" and date_start is not None:
+        date_start = datetime.strptime(date_start, '%m/%d/%Y')
+        date_start = date_start.date()
+        # print("converted datime: " + str(StartDateIncidence))
+        # StartDateIncidence = request.GET.get('StarIncidence')
+    if date_end != "None" and date_end is not None:
+        # EndDateIncidence = convert_date(request.GET.get('EndIncidence'))
+        date_end = datetime.strptime(date_end, '%m/%d/%Y')
+        date_end = date_end.date()
+        # EndDateIncidence = datetime.date(EndDateIncidence.year, EndDateIncidence.month, EndDateIncidence.day)
+
+    # Process the form without user
+    if date_end is not None:
+        query_squid = LogsSquidPartitioned.objects.filter(date_time__range=(date_start, date_end)).\
+            filter(ip_client__contains=user_cell)
+        query_kerio = LogsKerio.objects.filter(date_time__range=(date_start, date_end))
+        # [:SliceTmp.objects.get().end]
+        # [:SliceTmp.objects.get().end]
+
+        # b_list = BlackListDomain.objects.filter(category=category)SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
+        slice = SliceTmp.objects.get(pk=1)
+
+        # print("b_list count: " + str(b_list.count()))
+
+        # blackListDomainCategory = BlackListDomain.objects.filter(category=category)
+
+        print("------slice inicio:" + str(SliceTmp.objects.get(pk=1).start))
+        print("------slice fin:" + str(SliceTmp.objects.get(pk=1).end))
+
+        # Reset entity slice
+        if category_black_list_domain.count() / slice.multiplier < slice.step:
+            slice.start = 0
+            slice.end = slice.multiplier
+            slice.step = 1
+            slice.save()
+
+            # Next iteration in the black list
+        slice_get = SliceTmp.objects.get(pk=1)
+        if up_bl is not None:
+            black_list_slice = BlackListDomain.objects.all()
+            if black_list_slice.count() / slice_get.multiplier > slice_get.step:
+                slice_get.start = slice_get.start + slice_get.multiplier
+                slice_get.end = slice_get.end + slice_get.multiplier
+                slice_get.step = slice_get.step + 1
+                slice_get.save()
+                print("-------Page is None, the step is up")
+                print("-------Black list total:" + str(black_list_slice.count()))
+                print("-------Black list / multiplier:" + str(black_list_slice.count() / slice_get.multiplier))
+        if down_bl is not None:
+            if slice_get.end > slice_get.multiplier:
+                slice_get.start = slice_get.start - slice_get.multiplier
+                slice_get.end = slice_get.end - slice_get.multiplier
+                slice_get.step = slice_get.step - 1
+                slice_get.save()
+                print("-------In the slice, step is down")
+                print('slice_get.start' + str(slice_get.start))
+                print('slice_get.end' + str(slice_get.end))
+                print(' slice_get.step' + str(slice_get.step))
+
+        b_list = BlackListDomain.objects.filter(category=category)[
+                 SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
+
+        list_tmp_incidence = []
+
+        # List incidence to show in template
+        list_incidence_squid = []
+
+        # print("-------many of query_squid:" + str(query_squid.count()))
+        # print("-------many of query_kerio:" + str(query_kerio.count()))
+
+        for bl in b_list:
+            # print("query_squid: " + str(query_squid.count()))
+            print(" for bl in b_list:")
+            print("query_squid.count: " + str(query_squid.count()))
+            contains_incidence = query_squid.filter(url__contains=bl.domain)  # .order_by('ip_client')
+            print(" paso:" + str(contains_incidence.first()))
+            print("contains_incidence.count(): " + str(contains_incidence.__len__()))
+            print("contains_incidence.count(): " + str(contains_incidence.count()))
+            if contains_incidence.count() > 0:
+                print("-------black objet:" + str(bl.domain))
+
+                for obj_s in contains_incidence:
+                    print("-------black objet:" + str(bl.domain))
+                    print("entro")
+                    list_incidence_squid.append(obj_s)
+
+        list_incidence_squid.sort(key=sortListLogSquidObj)
+
+        # Increase the value in temp slice
+        print("b_list count: " + str(b_list.count()))
+        # if up_bl == 1 and category_black_list_domain.count() / slice.step <= slice.step + 1:
+        #     print("entro up_bl")
+        #     slice1 = SliceTmp.objects.get(pk=1)
+        #     slice1.start = slice1.start + slice1.multiplier
+        #     slice1.end = slice1.end + slice1.multiplier
+        #     slice1.step += 1
+        #     slice1.save()
+        #
+        # # Decrease the value in temp slice
+        # if down_bl == -1 and slice.step > 1:
+        #     print("entro down_bl")
+        #     slice1 = SliceTmp.objects.get(pk=1)
+        #     slice1.start = slice1.start - slice1.multiplier
+        #     slice1.end = slice1.end - slice1.multiplier
+        #     slice1.step -= 1
+        #     slice1.save()
+
+        # Paginator Squid
+        paginator = Paginator(list_incidence_squid, 35)  # Show 25 contacts per page.
+        page_number = request.GET.get('page')
+        page_obj_squid = paginator.get_page(page_number)
+
+        # Format to jquery format
+        date_start = str(date_start.month) + '/' + str(date_start.day) + '/' + str(
+            date_start.year)
+        date_end = str(date_end.month) + '/' + str(date_end.day) + '/' + str(
+            date_end.year)
+
+        # render to a URL:
+        return render(request, 'analysis_squid_kerio/ask_tables_filter.html', {'form': form,
+                                                                               'user_ctrl': user_ctrl,
+                                                                               'incidence': userIncidenceForm,
+                                                                               'user_cell': user_cell,
                                                                                'date_start': date_start,
                                                                                'date_end': date_end,
                                                                                'incidence_ctrl': incidence_ctrl,

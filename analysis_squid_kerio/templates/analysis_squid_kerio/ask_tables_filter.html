@@ -143,7 +143,7 @@
 
 											<div class="widget-body">
 												<div class="widget-main  " data-inline-type="true">
-													<form class="form-horizontal" action="{% url 'analysis_squid_kerio:report_filter' %}" method="get">
+													<form class="form-horizontal" action="{% url 'analysis_squid_kerio:report_filterSquidDateUser' %}" method="get">
 														{% csrf_token %}
 														{{ form.non_field_errors }}
 															{#  form.user_cell.errors #}
