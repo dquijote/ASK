@@ -5,22 +5,106 @@ import math
 from itertools import count
 
 from django.core import paginator
+from django.core.files import uploadedfile
+from django.core.files.uploadedfile import UploadedFile, TemporaryUploadedFile
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
-from analysis_squid_kerio.form import RangeDateUserForm, RangeDateForm
+from analysis_squid_kerio.form import RangeDateUserForm, RangeDateForm, UploadLogForm
 from analysis_squid_kerio.models import CategoryBlackListDomain, User, LogsSquidPartitioned
 from .models import LogsKerio, LogsSquid, BlackListDomain, SliceTmp, LogsSquidTmp,SearchParameterSquid
 
-from .form import filter_userForm, FilterIncidenceForm
+from .form import filter_userForm, FilterIncidenceForm, UploadLogForm
 
 # Create your views here.
 
 
-def index(request):
+def read_file(filename):
+    try:
+        f = open(filename, "rb")
+    except IOError as e:
+        print(e.errno, e.message)
+    else:
+        data = f.read()
+        f.close()
+        return data
 
+
+def enterSquidPostgre(file_squid):
+    # conn_posgre = connect_postgre(db_postgre, user_postgre, pass_postgre, host_postgre)
+    # c2 = conn_posgre.cursor()
+    # path_squid = file_squid
+
+    # try:
+        # file_log_squid = open(path_squid)
+    # for file_log_squid in file_squid.chunks():
+    #     # print("file_log_squid: " + str(file_log_squid))
+    #     count = 0
+    # for file_squid in file_squid1.chunks():
+    logSquidList = []
+    # file_squid = file_squid.decode('utf-8')
+    for line_log_squid in file_squid:
+        line_log_squid = line_log_squid.decode('utf-8')
+        line_split = line_log_squid.split()
+
+        logSquidObject = LogsSquidPartitioned()
+
+        date_time = line_split[0]
+        time_request = line_split[1]
+        ip_client = line_split[2]
+        cache_result_code = line_split[3]
+        size_transfered = line_split[4]
+        http_method = line_split[5]
+        url = line_split[6]
+        user_name = line_split[7]
+        request_server_name = line_split[8]
+        content_type = line_split[9]
+
+        date_time1 = datetime.fromtimestamp(float(date_time.partition(".")[0]))
+        date_time2 = datetime.strptime(str(date_time1), '%Y-%m-%d %H:%M:%S')
+
+        logSquidObject.date_time =date_time2
+        logSquidObject.time_request = time_request
+        logSquidObject.ip_client = ip_client
+        logSquidObject.cache_result_code = cache_result_code
+        logSquidObject.size_transfered = size_transfered
+        logSquidObject.http_method = http_method
+        logSquidObject.url = url
+        logSquidObject.user_name = user_name
+        logSquidObject.request_server_name = request_server_name
+        logSquidObject.content_type = content_type
+        logSquidObject.time_stamp = date_time
+
+        logSquidList.append(logSquidObject)
+
+    LogsSquidPartitioned.objects.bulk_create(logSquidList)
+
+
+        # El resultado de "cursor.execute" puede ser iterado por fila
+        # c2.execute('''PRAGMA synchronous = OFF''')
+        # c2.execute(
+        #     "insert into analysis_squid_kerio_logssquidpartitioned(date_time, time_request, ip_client, cache_result_code, size_transfered, http_method, url, "
+        #     "user_name, request_server_name, content_type, time_stamp)"
+        #     "values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (
+        #         date_time2, str(time_request), str(ip_client), str(cache_result_code), str(size_transfered),
+        #         str(http_method),
+        #         str(url), str(user_name), str(request_server_name), str(content_type), str(date_time)))
+        # if count % 10000 == 0:
+        #     conn_posgre.commit()
+
+        #     count += 1
+        #     print("\r Lineas guardadas de Squid: " + str(count), end="", flush=True)
+        #
+        # print("\n")
+        # # conn_posgre.close()
+    # except:
+    #     print('')
+    return ""
+
+
+def index(request):
     #return render(request, 'index.html')
     return render(request, 'analysis_squid_kerio/ask-index.html')
 
@@ -81,7 +165,7 @@ def report_withoutuser(request):
         print(date_first_squid)
         print(date_end_squid)
 
-        query = LogsSquid.objects.filter(date_time__range=(date_first_squid, date_end_squid))
+        query = LogsSquidPartitioned.objects.filter(date_time__range=(date_first_squid, date_end_squid))
     if hidden_button_kerio == 'kerio':
         param_form_squid_first = request.GET.get('StarDate')
         param_form_squid_end = request.GET.get('EndDate')
@@ -100,16 +184,48 @@ def report_withoutuser(request):
     context = {'query': page_query_squid,
                'query_kerio': page_query_kerio,
                'form': form,
+               'UploadLogForm': UploadLogForm(),
 
                'param_form_squid_first': request.GET.get('StarDate'),
                'param_form_squid_end': request.GET.get('EndDate'),
 
-               'param_form_squid_first': request.GET.get('StarDate'),
-               'param_form_squid_end': request.GET.get('EndDate')
+               # 'param_form_squid_first': request.GET.get('StarDate'),
+               # 'param_form_squid_end': request.GET.get('EndDate')
 
                }
 
     return render(request, 'analysis_squid_kerio/ask_tables_withoutuser.html', context)
+
+
+def report_uploadLog(request):
+    print('request.method', request.method)
+    if request.method == 'POST':
+        print('post')
+        # request.upload_handlers()
+        print('UploadedFile.size: ' + str(request.FILES['logsFile'].size))
+
+        # print(request.FILES['logsFile'].TemporaryUploadedFile.temporary_file_path())
+        form = UploadLogForm(request.POST, request.FILES)
+        print(form)
+        if form.is_valid():
+            print("form is valid")
+            print('request.POST: ' + str(request.POST['typeLog']))
+            enterSquidPostgre(request.FILES['logsFile'])
+            # print('request: ' + str(request['typeLog']))
+            context = {
+                'UploadLogForm': UploadLogForm(),
+                'form': RangeDateForm(),
+                'message': 'Se inserto el log en BD con exito.'
+
+            }
+            # return HttpResponseRedirect('/success/url/')
+            return render(request, 'analysis_squid_kerio/ask_tables_withoutuser.html', context)
+        else:
+            context = {'UploadLogForm': UploadLogForm()}
+            print('form is not valid')
+            return render(request, 'analysis_squid_kerio/ask_tables_withoutuser.html', context)
+
+    return render(request, 'analysis_squid_kerio/ask_tables_withoutuser.html', {'UploadLogForm': UploadLogForm, 'message': 'prueba'})
 
 
 def report(request):
@@ -671,6 +787,7 @@ def reportFilterSquidDate(request):
         # [:SliceTmp.objects.get().end]
         # [:SliceTmp.objects.get().end]
 
+
         # b_list = BlackListDomain.objects.filter(category=category)SliceTmp.objects.get(pk=1).start:SliceTmp.objects.get(pk=1).end]
         slice = SliceTmp.objects.get(pk=1)
 
@@ -724,18 +841,20 @@ def reportFilterSquidDate(request):
 
         for bl in b_list:
             # print("query_squid: " + str(query_squid.count()))
-            print(" for bl in b_list:")
-            print("query_squid.count: " + str(query_squid.count()))
+            # print(" for bl in b_list:")
+            # print("query_squid.count: " + str(query_squid.count()))
+            # print("query_squid[3]: " + str(query_squid))
             contains_incidence = query_squid.filter(url__contains=bl.domain)  # .order_by('ip_client')
-            print(" paso:" + str(contains_incidence.first()))
-            print("contains_incidence.count(): " + str(contains_incidence.__len__()))
-            print("contains_incidence.count(): " + str(contains_incidence.count()))
+            # print('bl.domain', bl.domain)
+            # print(" paso:" + str(contains_incidence.first()))
+            # print("contains_incidence.count(): " + str(contains_incidence.__len__()))
+            # print("contains_incidence.count(): " + str(contains_incidence.count()))
             if contains_incidence.count() > 0:
-                print("-------black objet:" + str(bl.domain))
+                # print("-------black objet:" + str(bl.domain))
 
                 for obj_s in contains_incidence:
-                    print("-------black objet:" + str(bl.domain))
-                    print("entro")
+                    # print("-------black objet:" + str(bl.domain))
+                    # print("entro")
                     list_incidence_squid.append(obj_s)
 
         list_incidence_squid.sort(key=sortListLogSquidObj)
@@ -841,8 +960,11 @@ def report_filterDateUserSquid(request):
 
     # Process the form without user
     if date_end is not None:
-        query_squid = LogsSquidPartitioned.objects.filter(date_time__range=(date_start, date_end)).\
-            filter(ip_client__contains=user_cell)
+        print('date_start', date_start)
+        print('date_end', date_end)
+        print('user_cell', user_cell)
+        query_squid = LogsSquidPartitioned.objects.filter(date_time__range=(date_start, date_end)).filter(ip_client__contains=int(user_cell)) #
+        print('query_squid' + str(query_squid))
         query_kerio = LogsKerio.objects.filter(date_time__range=(date_start, date_end))
         # [:SliceTmp.objects.get().end]
         # [:SliceTmp.objects.get().end]

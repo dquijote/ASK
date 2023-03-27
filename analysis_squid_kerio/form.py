@@ -75,3 +75,9 @@ class RangeDateUserForm(forms.Form):
                                attrs={
                                    'placeholder': 'Usuario',
                                }))
+
+
+class UploadLogForm(forms.Form):
+    logsFile = forms.FileField(label='Log', required=True)
+    # photo = forms.ImageField()
+

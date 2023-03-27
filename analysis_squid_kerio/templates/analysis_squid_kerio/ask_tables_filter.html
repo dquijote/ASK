@@ -1,7 +1,11 @@
 {% extends "index.html" %}
 {% load static %}
 {% block title%}Reporte Filtro{% endblock title%}
-
+<style>
+    tr{
+        background-color: red;
+    }
+</style>
 {% block specific_plugin%}
 		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/jquery-ui.custom.min.css'%}" />
 		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/chosen.min.css'%}" />
@@ -11,10 +15,29 @@
 		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/bootstrap-datetimepicker.min.css'%}" />
 		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/bootstrap-colorpicker.min.css'%}" />
 
+    <!-- bootstrap & fontawesome -->
+		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/bootstrap.min.css' %}" />
+		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/font-awesome/4.5.0/css/font-awesome.min.css' %}" />
+
+		<!-- page specific plugin styles -->
+		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/jquery.gritter.min.css' %}" />
+
+		<!-- text fonts -->
+		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/fonts.googleapis.com.css' %}" />
+
+		<!-- ace styles -->
+		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/ace.min.css' %}" class="ace-main-stylesheet" id="main-ace-style" />
+
+    <link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/ace-skins.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css/ace-rtl.min.css' %}" />
+
     {# My style #}
 		<link rel="stylesheet" href="{% static 'analysis_squid_kerio/assets/css_mine/style.css'%}" />
     {# My style #}
 {% endblock specific_plugin%}
+
+
+
 
 {% block breadcrumbs%}{% endblock breadcrumbs%}
 {% block active_open_report %}active open{% endblock active_open_report %}
@@ -265,6 +288,7 @@
 
 								<div class="row">
 									<div class="col-xs-12">
+                                    <button class="btn btn-success" id="bootbox-options">More Options</button>
 										<h3 class="header smaller lighter blue">Logs Squid (Cell)</h3>
 
 										<div class="clearfix">
@@ -327,7 +351,14 @@
 														</td>
 														<td>{{ query1.date_time | date}}</td>
 														<td >{{ query1.time_request}}</td>
-														<td><a href="#">{{query1.ip_client}}</a></td>
+{#														<td><a href="#" id="{{ query1.id }}_{{ query1.ip_client }}" data-username="{{ query1.ip_client.name }}" onclick="userInfo(this)">{{query1.ip_client}}</a></td>#}
+                                                        <td title="
+                                                        Celular: {{ query1.ip_client }}
+                                                        Nombre: Prueba nombre" data-title="\<p>prueba de parrafo</p>">
+                                                            <a href="#" id="{{ query1.id }}_{{ query1.ip_client }}">
+                                                                {{query1.ip_client}}
+                                                            </a>
+                                                        </td>
 
 														<td class="hidden-480">
 															<span class="label label-sm label-warning">{{query1.cache_result_code}}</span>
@@ -574,6 +605,13 @@
 		<script src="{% static 'analysis_squid_kerio/assets/js/jquery.maskedinput.min.js' %}"></script>
 		<script src="{% static 'analysis_squid_kerio/assets/js/bootstrap-tag.min.js' %}"></script>
 
+    <!--from Element -->
+		<script src="{% static 'analysis_squid_kerio/assets/js/jquery.ui.touch-punch.min.js' %}"></script>
+		<script src="{% static 'analysis_squid_kerio/assets/js/bootbox.js' %}"></script>
+		<script src="{% static 'analysis_squid_kerio/assets/js/jquery.easypiechart.min.js' %}"></script>
+		<script src="{% static 'analysis_squid_kerio/assets/js/jquery.gritter.min.js' %}"></script>
+		<script src="{% static 'analysis_squid_kerio/assets/js/spin.js' %}"></script>
+
 		<!-- ace scripts -->
 		<script src="{% static 'analysis_squid_kerio/assets/js/ace-elements.min.js' %}"></script>
 		<script src="{% static 'analysis_squid_kerio/assets/js/ace.min.js' %}"></script>
@@ -817,6 +855,50 @@
 
 
 			})
+            function userInfo(e){
+			    //alert(e.id); //bootbox-options
+                id_user = e.id;
+                {#query_incidence = {{ query }}#}
+                message_modal =  "<span class='bigger-110'>I am a custom dialog with smaller buttons " + id_user + "</span>";
+			    $("#"+id_user).on(ace.click_event, function() {
+                    bootbox.dialog({
+                        message: message_modal,
+                        buttons:
+                            {
+                                "success" :
+                                    {
+                                        "label" : "<i class='ace-icon fa fa-check'></i> Success!",
+                                        "className" : "btn-sm btn-success",
+                                        "callback": function() {
+                                            //Example.show("great success");
+                                        }
+                                    },
+                                "danger" :
+                                    {
+                                        "label" : "Danger!",
+                                        "className" : "btn-sm btn-danger",
+                                        "callback": function() {
+                                            //Example.show("uh oh, look out!");
+                                        }
+                                    },
+                                "click" :
+                                    {
+                                        "label" : "Click ME!",
+                                        "className" : "btn-sm btn-primary",
+                                        "callback": function() {
+                                            //Example.show("Primary button");
+                                        }
+                                    },
+                                "button" :
+                                    {
+                                        "label" : "Just a button...",
+                                        "className" : "btn-sm"
+                                    }
+                            }
+                    });
+                });
+            }
+
 //FORM ELEMENT
 			jQuery(function($) {
 				$('#id-disable-check').on('click', function() {

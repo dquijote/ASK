@@ -7,6 +7,25 @@ from psqlextra.models import PostgresPartitionedModel
 # Create your models here.
 
 
+class LogsKerioPartitioned(PostgresPartitionedModel):
+    class PartitioningMeta:
+        method = PostgresPartitioningMethod.RANGE
+        key = ["date_time"]
+    ip_addres = models.PositiveBigIntegerField("IP")
+    user_name = models.CharField("Usuario", max_length=200)
+    date_time = models.DateTimeField("Fecha")
+    time_zone = models.CharField("Zona horario", max_length=100)
+    http_method = models.CharField("Metodo http", max_length=50)
+    url = models.CharField("Url", max_length=10000)
+    version_http = models.CharField("Version de http", max_length=50)
+    code_http = models.CharField("Codigo http", max_length=200)
+    size_transfered = models.IntegerField("Tamanno de transf")
+    count_requests_transferred = models.CharField("Cant de transferencia", max_length=1000)
+
+    def __str__(self):
+        return str(self.ip_addres) + str(': ') + str(self.user_name)
+
+
 class LogsKerio(models.Model):
     ip_addres = models.PositiveBigIntegerField("IP")
     user_name = models.CharField("Usuario", max_length=200)
@@ -37,7 +56,8 @@ class LogsSquidPartitioned(PostgresPartitionedModel):
     content_type = models.CharField("Tipo de contenido", max_length=100)
 
     def __str__(self):
-        return str(self.ip_client)
+        # return str(self.time_stamp) + ' ' + str(self.date_time) + ' ' + str(self.time_request) + ' ' + str(self.ip_client) + ' ' + str(self.cache_result_code) + ' ' + str(self.size_transfered) + ' ' + str(self.http_method) + ' ' + str(self.url) + ' ' + str(self.user_name) + ' ' + str(self.request_server_name) + ' ' + str(self.content_type)
+        return str(self.time_stamp)
 
 
 class LogsSquid(models.Model):
@@ -119,7 +139,7 @@ class Entity(models.Model):
 
 
 class User(models.Model):
-    cell = models.IntegerField(unique=True)
+    cell = models.IntegerField(unique=True, blank=True)
     name = models.CharField("Nombre", max_length=200)
     lastName1 = models.CharField("Primer Apellido", max_length=200)
     lastName2 = models.CharField("Segundo Apellido", max_length=200)

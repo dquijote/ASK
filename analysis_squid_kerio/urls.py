@@ -7,6 +7,7 @@ urlpatterns = [
 
     path('', views.index, name='index'),
     path('report', views.report_withoutuser, name='report_withoutuser'),
+    path('report/upload', views.report_uploadLog, name='report_uploadLog'),
     path('report/user', views.report, name='report'),
     path('report/filter', views.report_filter, name='report_filter'),
     path('report/filter/user', views.report_filterDateUserSquid, name='report_filterSquidDateUser'),
