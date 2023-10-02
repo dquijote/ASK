@@ -1,0 +1,29 @@
+version: '2'
+services:
+    psqlContainer2:
+        image: postgres
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - /home/fernan/Documentos/Analisis_logs/proyectoDJ/BD/:/var/lib/postgresql/data/
+    adminerCont:
+        image: adminer
+        ports:
+            - "8800:8080"
+        # volumes:
+        #     - ./data:/var/lib/mysql
+        # environment:
+        #     MYSQL_ROOT_PASSWORD: password 
+    web:
+        image: ubuntu:dj3.2
+        ports:
+            - "8000:8000"
+        volumes:
+            - /home/fernan/Documentos/Analisis_logs/proyectoDJ/logs_analysis/:/django_ASK
+        depends_on:
+            - psqlContainer2
+        command: python3 manage.py runserver 0.0.0.0:8000 && python3 manage.py migrate
+        # environment:
+        #     MYSQL_ROOT_PASSWORD: password     
