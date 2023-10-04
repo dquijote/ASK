@@ -183,13 +183,14 @@ class User(models.Model):
 
 # Store the temp part from the slice
 class SliceTmp(models.Model):
-    start = models.IntegerField("Slice inicio")
-    end = models.IntegerField("Slice fin")
-    step = models.IntegerField("Slice paso")
-    multiplier = models.IntegerField("Multiplicador ")
+    start = models.IntegerField("Slice inicio", default=0)
+    end = models.IntegerField("Slice fin", default=10)
+    step = models.IntegerField("Slice paso", default=10)
+    multiplier = models.IntegerField("Multiplicador ", default=10)
 
     def __str__(self):
-        return "incio:" + str(self.start) + " - " + "fin:" + str(self.end) + "paso:" + str(self.step)
+        return "incio: " + str(self.start) + " - " + "fin: " + str(self.end) + " - " + "paso: " + str(self.step) + \
+    " - " + 'Multiplicador: ' + str(self.multiplier)
 
 
 class SocialNetwork(models.Model):
