@@ -206,6 +206,7 @@ def report_uploadLog(request):
 
         # print(request.FILES['logsFile'].TemporaryUploadedFile.temporary_file_path())
         form = UploadLogForm(request.POST, request.FILES)
+        print(request.POST['typeLog'])
         print(form)
         if form.is_valid():
             print("form is valid")
@@ -215,7 +216,8 @@ def report_uploadLog(request):
             context = {
                 'UploadLogForm': UploadLogForm(),
                 'form': RangeDateForm(),
-                'message': 'Se inserto el log en BD con exito.'
+                'message': 'Se inserto el log en BD con exito.',
+                'fileName': request.FILES['logsFile'].name
 
             }
             # return HttpResponseRedirect('/success/url/')
